@@ -1,48 +1,41 @@
 import java.io.*;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        final var str1 = new ArrayList<>(new BufferedReader(new FileReader("a")).lines().toList());
-        final var str2 = new ArrayList<>(new BufferedReader(new FileReader("b")).lines().toList());
+    public static void main(String[] args) {
+        compareFiles("b", "a", "c");
+    }
 
-        System.out.println("Перебирание:");
+    public static void compareFiles(String file1Path, String file2Path, String outputPath) {
+        Set<String> file1Lines = readFileLines(file1Path);
+        Set<String> file2Lines = readFileLines(file2Path);
+        Set<String> uniqueLines = new HashSet<>(file1Lines);
+        uniqueLines.removeAll(file2Lines);
+        writeToFile(outputPath, uniqueLines);
+    }
 
-        int i = 0;
-//        int h = str2.size() / 100;
-        for (final var s2 : str2) {
-            if (i % 100000 == 0) {
-                System.out.println(i + "/" + str2.size());
+    private static Set<String> readFileLines(String filePath) {
+        Set<String> lines = new HashSet<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
             }
-
-            i++;
-
-            str1.remove(s2);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return lines;
+    }
 
-        final var outputFile = new File("c");
-        outputFile.createNewFile();
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter("c"));
-
-        System.out.println("Создание файла:");
-
-        int j = 0;
-//        h = str1.size() / 100;
-        for (final var s1 : str1) {
-            try {
-                if (j % 100000 == 0) {
-                    System.out.println(j + "/" + str1.size());
-                }
-
-                j++;
-
-                writer.write(s1 + "\n");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+    private static void writeToFile(String filePath, Set<String> lines) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        writer.close();
     }
 }
